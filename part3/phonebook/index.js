@@ -1,7 +1,6 @@
 const express = require('express');
 var morgan = require('morgan')
 const app = express();
-const cors = require('cors')
 
 let contacts = [
     {
@@ -26,21 +25,14 @@ let contacts = [
     }
 ];
 
-var corsOptions = {
-  origin: 'http://localhost:5173',
-  optionsSuccessStatus: 200
-}
-app.use(cors(corsOptions))
-
+app.use(express.static('dist'))
 app.use(express.json());
-
 morgan.token(
 	'body',
 	function (req, res) {
 		return JSON.stringify(req.body);
 	}
 )
-
 app.use(morgan(':method :url :status :response-time ms - :res[content-length] :body'));
 
 app.get("/api/contacts", (req, res) => {
@@ -94,7 +86,7 @@ app.get("/info", (req, res) => {
 	);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
