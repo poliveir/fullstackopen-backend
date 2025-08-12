@@ -4,7 +4,6 @@ const argvLen = process.argv.length;
 if (argvLen < 4) {
 	console.error('Please provide the username and password as an argument: node mongo.js <username> <password>');
 	process.exit(1);
-
 }
 
 const user = process.argv[2];

@@ -1,29 +1,8 @@
 const express = require('express');
-var morgan = require('morgan')
+var morgan = require('morgan');
 const app = express();
-
-let contacts = [
-    {
-      "id": "1",
-      "name": "Arto Hellas",
-      "number": "040-123456"
-    },
-    {
-      "id": "2",
-      "name": "Ada Lovelace",
-      "number": "39-44-5323523"
-    },
-    {
-      "id": "3",
-      "name": "Dan Abramov",
-      "number": "12-43-234345"
-    },
-    {
-      "id": "4",
-      "name": "Mary Poppendieck",
-      "number": "39-23-6423122"
-    }
-];
+require('dotenv').config();
+const Contact = require('./models/contact');
 
 app.use(express.static('dist'))
 app.use(express.json());
@@ -36,23 +15,29 @@ morgan.token(
 app.use(morgan(':method :url :status :response-time ms - :res[content-length] :body'));
 
 app.get("/api/contacts", (req, res) => {
-	res.json(contacts);
+	Contact
+		.find({})
+		.next(contacts => res.json(contacts))
+		.catch(error => res.status(500).end());
 });
 
 app.get('/api/contacts/:id', (req, res) => {
-	const id = req.params.id;
-	const contact = contacts.find(contact => contact.id === id);
-
-	if (contact)
-		res.json(contact);
-	else
-		res.status(404).end()
+	Contact
+		.findById(req.params.id)
+		.then(contact => {
+			if (contact)
+				res.json(contact);
+			else
+				res.status(404).end();
+		})
+		.catch(error => res.status(500).end());
 });
 
 app.delete('/api/contacts/:id', (req, res) => {
-	const id = req.params.id;
-	contacts = contacts.filter(contact => contact.id !== id);
-	res.status(204).end();
+	Contact
+		.findByIdAndDelete(req.params.id)
+		.then(() => res.status(204).end())
+		.catch(error => res.status(500).end());
 });
 
 app.post('/api/contacts', (req, res) => {
@@ -67,16 +52,17 @@ app.post('/api/contacts', (req, res) => {
 			error:  "number is missing"
 		});
 
-	if (contacts.find(c => c.name === contact.name))
-		return res.status(400).json({
-			error:  "name must be unique"
-		});
-	const newContact = {
-		...contact,
-		id: Math.random().toString(12).substring(2, 11)
-	};
-	contacts = contacts.concat(newContact);
-	res.json(newContact);
+	Contact
+		.find({name: contact.name})
+		.then(existingContact => {
+			if (existingContact)
+				return res.status(400).json({
+					error:  "name must be unique"
+				});
+			else
+				res.json(contact);
+		})
+		.catch(error => res.status(500).end());
 });
 
 app.get("/info", (req, res) => {
@@ -86,7 +72,7 @@ app.get("/info", (req, res) => {
 	);
 });
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
