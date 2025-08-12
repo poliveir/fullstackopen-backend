@@ -17,7 +17,10 @@ app.use(morgan(':method :url :status :response-time ms - :res[content-length] :b
 app.get("/api/contacts", (req, res) => {
 	Contact
 		.find({})
-		.then(contacts => res.json(contacts))
+		.then(contacts => {
+			console.log(contacts);
+			return res.json(contacts);
+		})
 		.catch(error => res.status(500).end());
 });
 
@@ -55,7 +58,8 @@ app.post('/api/contacts', (req, res) => {
 	Contact
 		.find({name: contact.name})
 		.then(existingContact => {
-			if (existingContact)
+			console.error(existingContact, existingContact.length);
+			if (existingContact.length > 0)
 				return res.status(400).json({
 					error:  "name must be unique"
 				});
