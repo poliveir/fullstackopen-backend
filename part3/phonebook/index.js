@@ -79,6 +79,18 @@ app.post('/api/contacts', (req, res) => {
 		.catch(error => res.status(500).end());
 });
 
+app.put('/api/contacts/:id', (req, res) => {
+	const contact = req.body;
+	Contact
+		.findByIdAndUpdate(
+			req.params.id,
+			contact,
+			{new: true}
+		)
+		.then(updatedContact => res.json(updatedContact))
+		.catch(error => res.status(500).end());
+});
+
 app.get("/info", (req, res) => {
 	res.send(
 		`<p>Phonebook has info for ${contacts.length} people</p>\
