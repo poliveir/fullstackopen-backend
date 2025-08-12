@@ -17,7 +17,7 @@ app.use(morgan(':method :url :status :response-time ms - :res[content-length] :b
 app.get("/api/contacts", (req, res) => {
 	Contact
 		.find({})
-		.next(contacts => res.json(contacts))
+		.then(contacts => res.json(contacts))
 		.catch(error => res.status(500).end());
 });
 
