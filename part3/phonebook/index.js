@@ -63,8 +63,18 @@ app.post('/api/contacts', (req, res) => {
 				return res.status(400).json({
 					error:  "name must be unique"
 				});
-			else
-				res.json(contact);
+			else {
+				const newContact = new Contact({
+					name: contact.name,
+					number: contact.number
+				});
+				newContact
+					.save()
+					.then(savedContact =>
+						res.json(savedContact)
+					)
+					.catch(error => res.status(500).end());
+			}
 		})
 		.catch(error => res.status(500).end());
 });
