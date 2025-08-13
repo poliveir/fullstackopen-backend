@@ -21,7 +21,9 @@ const contactSchema = new mongoose.Schema({
 	},
 	number: {
 		type: String,
-		required: true
+		minLength: 8,
+		required: true,
+		validate: [(val) =>  /^\d{2,3}-\d+$/.test(val), '{VALUE} is not a valid phone number. Phone number should be in the format 00-0000000 or 000-0000000']
 	}
 });
 
