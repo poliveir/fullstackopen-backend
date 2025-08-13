@@ -70,7 +70,10 @@ app.put('/api/contacts/:id', (req, res, next) => {
 		.findByIdAndUpdate(
 			req.params.id,
 			contact,
-			{new: true}
+			{
+				new: true,
+				runValidators: true
+			}
 		)
 		.then(updatedContact => res.json(updatedContact))
 		.catch(error => next(error));
