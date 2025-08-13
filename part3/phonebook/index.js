@@ -21,7 +21,7 @@ app.get("/api/contacts", (req, res) => {
 			console.log(contacts);
 			return res.json(contacts);
 		})
-		.catch(error => res.status(500).end());
+		.catch(error => next(error));
 });
 
 app.get('/api/contacts/:id', (req, res) => {
@@ -33,14 +33,14 @@ app.get('/api/contacts/:id', (req, res) => {
 			else
 				res.status(404).end();
 		})
-		.catch(error => res.status(500).end());
+		.catch(error => next(error));
 });
 
 app.delete('/api/contacts/:id', (req, res) => {
 	Contact
 		.findByIdAndDelete(req.params.id)
 		.then(() => res.status(204).end())
-		.catch(error => res.status(500).end());
+		.catch(error => next(error));
 });
 
 app.post('/api/contacts', (req, res) => {
@@ -58,7 +58,6 @@ app.post('/api/contacts', (req, res) => {
 	Contact
 		.find({name: contact.name})
 		.then(existingContact => {
-			console.error(existingContact, existingContact.length);
 			if (existingContact.length > 0)
 				return res.status(400).json({
 					error:  "name must be unique"
@@ -73,10 +72,10 @@ app.post('/api/contacts', (req, res) => {
 					.then(savedContact =>
 						res.json(savedContact)
 					)
-					.catch(error => res.status(500).end());
+					.catch(error => next(error));
 			}
 		})
-		.catch(error => res.status(500).end());
+		.catch(error => next(error));
 });
 
 app.put('/api/contacts/:id', (req, res) => {
@@ -88,7 +87,7 @@ app.put('/api/contacts/:id', (req, res) => {
 			{new: true}
 		)
 		.then(updatedContact => res.json(updatedContact))
-		.catch(error => res.status(500).end());
+		.catch(error => next(error));
 });
 
 app.get("/info", (req, res) => {
@@ -97,6 +96,16 @@ app.get("/info", (req, res) => {
 		<p>${new Date()}</p>`
 	);
 });
+
+const errorHandler = (err, req, res, next) => {
+	console.error(err.message);
+
+	if (err.name === 'CastError')
+		return res.status(400).send({error: "malformatted id"});
+	else
+		return res.status(500).send({error: err.message});
+};
+app.use(errorHandler);
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
