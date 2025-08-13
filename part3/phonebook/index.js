@@ -14,17 +14,14 @@ morgan.token(
 )
 app.use(morgan(':method :url :status :response-time ms - :res[content-length] :body'));
 
-app.get("/api/contacts", (req, res) => {
+app.get("/api/contacts", (req, res, next) => {
 	Contact
 		.find({})
-		.then(contacts => {
-			console.log(contacts);
-			return res.json(contacts);
-		})
+		.then(contacts => res.json(contacts))
 		.catch(error => next(error));
 });
 
-app.get('/api/contacts/:id', (req, res) => {
+app.get('/api/contacts/:id', (req, res, next) => {
 	Contact
 		.findById(req.params.id)
 		.then(contact => {
@@ -36,24 +33,15 @@ app.get('/api/contacts/:id', (req, res) => {
 		.catch(error => next(error));
 });
 
-app.delete('/api/contacts/:id', (req, res) => {
+app.delete('/api/contacts/:id', (req, res, next) => {
 	Contact
 		.findByIdAndDelete(req.params.id)
 		.then(() => res.status(204).end())
 		.catch(error => next(error));
 });
 
-app.post('/api/contacts', (req, res) => {
+app.post('/api/contacts', (req, res, next) => {
 	const contact = req.body;
-
-	if (!contact.name)
-		return res.status(400).json({
-			error: "name is missing"
-		});
-	else if (!contact.number)
-		return res.status(400).json({
-			error:  "number is missing"
-		});
 
 	Contact
 		.find({name: contact.name})
@@ -69,16 +57,14 @@ app.post('/api/contacts', (req, res) => {
 				});
 				newContact
 					.save()
-					.then(savedContact =>
-						res.json(savedContact)
-					)
+					.then(savedContact => res.json(savedContact))
 					.catch(error => next(error));
 			}
 		})
 		.catch(error => next(error));
 });
 
-app.put('/api/contacts/:id', (req, res) => {
+app.put('/api/contacts/:id', (req, res, next) => {
 	const contact = req.body;
 	Contact
 		.findByIdAndUpdate(
@@ -90,7 +76,7 @@ app.put('/api/contacts/:id', (req, res) => {
 		.catch(error => next(error));
 });
 
-app.get("/info", (req, res) => {
+app.get("/info", (req, res, next) => {
 	Contact
 		.countDocuments()
 		.then(count => res.send(
@@ -105,6 +91,8 @@ const errorHandler = (err, req, res, next) => {
 
 	if (err.name === 'CastError')
 		return res.status(400).send({error: "malformatted id"});
+	else if (err.name === 'ValidationError')
+    	return res.status(400).json({ error: err.message })
 	else
 		return res.status(500).send({error: err.message});
 };
