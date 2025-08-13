@@ -89,8 +89,8 @@ app.get('/info', (req, res, next) => {
 		.catch(error => next(error))
 })
 
-const errorHandler = (err, req, res) => {
-	console.error(err.message)
+const errorHandler = (err, req, res, next) => {
+	console.error('ERROR NAME', err.name)
 
 	if (err.name === 'CastError')
 		return res.status(400).send({ error: 'malformatted id}' })
