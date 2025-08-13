@@ -96,8 +96,8 @@ app.get("/info", (req, res) => {
 		.then(count => res.send(
 			`<p>Phonebook has info for ${count} people</p>\
 			<p>${new Date()}</p>`
-		)
-		.catch(error => next(error)));
+		))
+		.catch(error => next(error));
 });
 
 const errorHandler = (err, req, res, next) => {
