@@ -91,10 +91,13 @@ app.put('/api/contacts/:id', (req, res) => {
 });
 
 app.get("/info", (req, res) => {
-	res.send(
-		`<p>Phonebook has info for ${contacts.length} people</p>\
-		<p>${new Date()}</p>`
-	);
+	Contact
+		.countDocuments()
+		.then(count => res.send(
+			`<p>Phonebook has info for ${count} people</p>\
+			<p>${new Date()}</p>`
+		)
+		.catch(error => next(error)));
 });
 
 const errorHandler = (err, req, res, next) => {
